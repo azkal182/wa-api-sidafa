@@ -60,6 +60,7 @@ model Chat {
 
     @@unique([sessionId, id], map: "unique_id_per_session_id_1")
     @@index([sessionId])
+    @@map("chat")
 }
 
 model Contact {
@@ -74,6 +75,7 @@ model Contact {
 
     @@unique([sessionId, id], map: "unique_id_per_session_id_2")
     @@index([sessionId])
+    @@map("contact")
 }
 
 model GroupMetadata {
@@ -102,6 +104,7 @@ model GroupMetadata {
 
     @@unique([sessionId, id], map: "unique_id_per_session_id_3")
     @@index([sessionId])
+    @@map("groupmetadata")
 }
 
 model Message {
@@ -158,6 +161,7 @@ model Message {
 
     @@unique([sessionId, remoteJid, id], map: "unique_message_key_per_session_id")
     @@index([sessionId])
+    @@map("message")
 }
 
 model Session {
@@ -168,4 +172,5 @@ model Session {
 
     @@unique([sessionId, id], map: "unique_id_per_session_id_4")
     @@index([sessionId])
+    @@map("session")
 }
