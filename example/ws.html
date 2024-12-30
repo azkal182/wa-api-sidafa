@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
+</head>
+
+<body>
+    <h1>WebSocket Client Test</h1>
+
+    <!-- Form untuk memasukkan session_id dan token -->
+    <div>
+        <label for="session_id">Session ID:</label>
+        <input type="text" id="session_id" placeholder="Enter session ID">
+    </div>
+    <div>
+        <label for="token">API Key (Token):</label>
+        <input type="text" id="token" placeholder="Enter your API Key">
+    </div>
+    <button onclick="connectToSocket()">Connect</button>
+
+    <hr>
+
+    <h3>Status:</h3>
+    <div id="status">Not connected</div>
+
+    <h3>Send Message:</h3>
+    <button onclick="sendMessage()">Send Message</button>
+
+    <script>
+        let socket;
+
+        // Fungsi untuk menghubungkan ke server WebSocket
+        function connectToSocket() {
+            const sessionId = document.getElementById("session_id").value;
+            const token = document.getElementById("token").value;
+
+            if (!sessionId || !token) {
+                alert("Please enter both Session ID and API Key!");
+                return;
+            }
+
+            // Membuat koneksi ke server WebSocket
+            socket = io("http://localhost:4000", {  // Ganti dengan URL server Anda
+                query: {
+                    session_id: sessionId, // Mengirim session_id melalui query
+                },
+                auth: {
+                    token: token, // Mengirim token untuk otentikasi
+                },
+            });
+
+            // Event listener untuk koneksi sukses
+            socket.on("connected", (data) => {
+                document.getElementById("status").innerText = "Connected! Session ID: " + data.session_id;
+            });
+
+            // Event listener untuk menangani error koneksi
+            socket.on("connect_error", (err) => {
+                document.getElementById("status").innerText = "Connection Error: " + err.message;
+            });
+
+            // Menangani event 'disconnect'
+            socket.on("disconnect", () => {
+                document.getElementById("status").innerText = "Disconnected";
+            });
+
+            // Menangani event custom yang bisa dikirim dari server
+            socket.on("some-event", (data) => {
+                console.log("Received from server:", data);
+            });
+        }
+
+        // Fungsi untuk mengirim pesan ke server
+        function sendMessage() {
+            if (!socket || socket.connected === false) {
+                alert("Please connect to the server first.");
+                return;
+            }
+
+            // Mengirim event custom ke server
+            socket.emit("some-event", { message: "Hello, Server!" });
+            console.log("Message sent to server!");
+        }
+    </script>
+</body>
+
+</html>

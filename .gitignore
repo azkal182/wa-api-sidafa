@@ -1,4 +1,8 @@
-node_modules
-# Keep environment variables out of version control
+node_modules/
+dist/
+debug/
+prisma/migrations/
 .env
-dist
+*.tgz
+*.log
+tsconfig.tsbuildinfo

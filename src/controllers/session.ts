@@ -1,60 +1,43 @@
-// @ts-nocheck
-
-import type { RequestHandler } from 'express';
-import {
-  createSession,
-  deleteSession,
-  getSession,
-  getSessionStatus,
-  listSessions,
-  sessionExists,
-} from '../wa';
+import WhatsappService from "@/whatsapp/service";
+import type { RequestHandler } from "express";
 
 export const list: RequestHandler = (req, res) => {
-  res.status(200).json(listSessions());
+	res.status(200).json(WhatsappService.listSessions());
 };
 
-export const find: RequestHandler = (req, res) => {
-    res.status(200).json({ message: 'Session found' });
-    return;    
-}
-
-
+export const find: RequestHandler = (req, res) =>
+	res.status(200).json({ message: "Session found" });
 
 export const status: RequestHandler = (req, res) => {
-  const session = getSession(req.params.sessionId)!;
-  res.status(200).json({ status: getSessionStatus(session) });
+	const session = WhatsappService.getSession(req.params.sessionId)!;
+	res.status(200).json({ status: WhatsappService.getSessionStatus(session) });
 };
+
 export const add: RequestHandler = async (req, res) => {
-    const { sessionId, readIncomingMessages, ...socketConfig } = req.body;
-  
-    if (sessionExists(sessionId)) {
-      res.status(400).json({ error: 'Session already exists' });
-      return;
-    }
-  
-    await createSession({ sessionId, res, readIncomingMessages, socketConfig });
-    return; 
-  };
-  
+	const { sessionId, readIncomingMessages, ...socketConfig } = req.body;
+
+	if (WhatsappService.sessionExists(sessionId))
+		return res.status(400).json({ error: "Session already exists" });
+	WhatsappService.createSession({ sessionId, res, readIncomingMessages, socketConfig });
+};
 
 export const addSSE: RequestHandler = async (req, res) => {
-  const { sessionId } = req.params;
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-  });
+	const { sessionId } = req.params;
+	res.writeHead(200, {
+		"Content-Type": "text/event-stream",
+		"Cache-Control": "no-cache",
+		Connection: "keep-alive",
+	});
 
-  if (sessionExists(sessionId)) {
-    res.write(`data: ${JSON.stringify({ error: 'Session already exists' })}\n\n`);
-    res.end();
-    return;
-  }
-  createSession({ sessionId, res, SSE: true });
+	if (WhatsappService.sessionExists(sessionId)) {
+		res.write(`data: ${JSON.stringify({ error: "Session already exists" })}\n\n`);
+		res.end();
+		return;
+	}
+	WhatsappService.createSession({ sessionId, res, SSE: true });
 };
 
 export const del: RequestHandler = async (req, res) => {
-  await deleteSession(req.params.sessionId);
-  res.status(200).json({ message: 'Session deleted' });
+	await WhatsappService.deleteSession(req.params.sessionId);
+	res.status(200).json({ message: "Session deleted" });
 };
